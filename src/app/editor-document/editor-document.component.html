@@ -1,0 +1,5 @@
+<div [id]="iDocument.id">
+  <ng-container *ngFor="let paragraph of iDocument.nodes">
+    <app-editor-paragraph [paragraph]="paragraph" [style]="paragraph.style"></app-editor-paragraph>
+  </ng-container>
+</div>

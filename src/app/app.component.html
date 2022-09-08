@@ -1,3 +1,15 @@
-<div>编辑器</div>
-<div>编辑器</div>
+<h1>编辑器</h1>
 <i class="fa fa-address-book" aria-hidden="true"></i>
+<h2>工具栏</h2>
+对文档进行多数操作的入口
+<h2>编辑区域</h2>
+可编辑区域里面有等待编辑的渲染好的文档，可以直接输入文字
+<h2>右键菜单</h2>
+对文档的段落进行快捷操作的入口
+
+<div id="editor-bar">
+  工具栏
+</div>
+<div id="editArea">
+  <app-editor-document [iDocument]="doc"></app-editor-document>
+</div>
