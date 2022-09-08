@@ -7,9 +7,11 @@
 <h2>右键菜单</h2>
 对文档的段落进行快捷操作的入口
 
-<div id="editor-bar">
-  工具栏
+<div class="editor-bar">
+  <span>加粗</span>
+  <span>斜体</span>
+  <span>下划线</span>
 </div>
-<div id="editArea">
+<div id="editArea" contenteditable="true" (keydown)="$event.preventDefault();keyDown($event)">
   <app-editor-document [iDocument]="doc"></app-editor-document>
 </div>

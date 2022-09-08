@@ -58,4 +58,16 @@ export class AppComponent {
       ]
     })
   }
+
+  /**
+   * 如何编辑文档，是文档有我们预定义的结构一样，直接设置外层的div为可编辑的contenteditable=true
+   * 这种编辑不会响应到组件内部的数据，并且也不会自动分隔段落样式等  数据和视图没有对应
+   *
+   * 拦截可编辑div的 输入文字拦截keyDown事件 eventHandler 并且设置preventdevault,
+   * 拦截后修改IDocument对象
+   * 组织keydown一个事件还不够，中文输入依旧可以输入
+   */
+  keyDown(event: Event) {
+    console.log(event)
+  }
 }
