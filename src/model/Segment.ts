@@ -1,6 +1,5 @@
 import {INode} from "./Node";
 import {IStyle} from "./IStyle";
-import {style} from "@angular/animations";
 
 export class ISegment extends INode {
   static create(data: any) {

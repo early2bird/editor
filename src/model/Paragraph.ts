@@ -16,8 +16,8 @@ export class IParagraph extends INode {
 
   constructor(id: string, segments: ISegment[], style: IStyle) {
     super(id, 'paragraph');
-    this.segments = segments.map(segment => {
-      return ISegment.create(segment)
+    this.segments = segments.map((segment,index) => {
+      return ISegment.create({...segment,id:`${this.id}${index}`})
     });
     this.id = id;
     this.style = style;

@@ -21,8 +21,8 @@ export class IDocument extends INode {
   constructor(id: string, nodes: IParagraph[] = []) {
     super(id, 'document');
     this.id = id;
-    this.nodes = nodes.map(node => {
-      return IParagraph.create(node);
+    this.nodes = nodes.map((node, index) => {
+      return IParagraph.create({...node, id: `${this.id}${index}`});
     })
   }
 
