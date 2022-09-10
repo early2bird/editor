@@ -80,7 +80,7 @@ export class AppComponent {
    */
   keyDown(event: KeyboardEvent) {
     // 这里如果考虑兼容性可以不使用字符串，可以使用对应编码来判断
-    if (['Shift', 'Ctrl', 'Alt', 'Mate'].includes(event.code)) {
+    if (['Shift', 'Control', 'Alt', 'Mate', ''].includes(event.key)) {
       return;
     }
     event.preventDefault();
@@ -88,7 +88,7 @@ export class AppComponent {
       this.deleteText(true);
     } else if (event.code === 'Delete') {
       this.deleteText(false);
-    } else if (event.key === 'b' && event.metaKey) {
+    } else if (event.key === 'b' && (event.metaKey || event.ctrlKey)) { // 加粗
       this.toggleBold();
     } else if (event.key === 'c' && event.metaKey && event.shiftKey) {
       this.applyCenter();
@@ -122,7 +122,7 @@ export class AppComponent {
     const startOffset = range.startOffset;
     const text = event.key;
     this.doc.insertText(id, startOffset, text);
-    // 插入完成后处理指针
+    // setTimeout
     setTimeout(() => {
       // 更新range，更新selection
       range.setEnd(startContainer, startOffset + text.length);
@@ -165,6 +165,28 @@ export class AppComponent {
   }
 
   toggleBold() {
+    const selection = window.getSelection();
+    if (!selection || !selection.getRangeAt(0)) {
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    const startContainer = range.startContainer;
+    const endContainer = range.endContainer;
+    const startOffset = range.startOffset;
+    const endOffset = range.endOffset;
+    const startParentElement = startContainer.parentElement;
+    const endParentElement = endContainer.parentElement;
+    if (!startParentElement || !endParentElement) {
+      return;
+    }
+    const startId = startParentElement?.id;
+    const endId = endParentElement?.id;
+    console.log(startOffset, endOffset, startId, endId)
+    this.doc.toggleBold(startId, endId, startOffset, endOffset, {
+      fontWeight: "bold"
+    })
+    this.doc = IDocument.create(this.doc);
+    console.log(this.doc, 'docs')
   }
 
   applyCenter() {
