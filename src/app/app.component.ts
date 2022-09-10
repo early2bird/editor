@@ -85,9 +85,9 @@ export class AppComponent {
     }
     event.preventDefault();
     if (event.code === 'Backspace') {
-      this.deleteText();
+      this.deleteText(true);
     } else if (event.code === 'Delete') {
-      this.deleteText();
+      this.deleteText(false);
     } else if (event.key === 'b' && event.metaKey) {
       this.toggleBold();
     } else if (event.key === 'c' && event.metaKey && event.shiftKey) {
@@ -119,7 +119,6 @@ export class AppComponent {
       return;
     }
     const id = parentElement.id;
-    console.log(id, '元素id')
     const startOffset = range.startOffset;
     const text = event.key;
     this.doc.insertText(id, startOffset, text);
@@ -132,7 +131,37 @@ export class AppComponent {
     })
   }
 
-  deleteText() {
+  // 退格删除，删除的是前面的元素，delete删除删除的是后面元素
+  deleteText(back: boolean) {
+    const selection = window.getSelection();
+    if (!selection || !selection.getRangeAt(0)) {
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    const startContainer = range.startContainer;
+    const parentElement = startContainer.parentElement;
+
+    if (!range.collapse) {
+      return;
+    }
+    if (!parentElement) {
+      return;
+    }
+    const id = parentElement.id;
+    const startOffset = range.startOffset;
+    // 删除前一个 delete删除后一个
+    const start = back ? startOffset - 1 : startOffset;
+    if (start < 0) {
+      return;
+    }
+    // 一次只能删除一个
+    this.doc.deleteText(id, start, 1);
+    setTimeout(() => {
+      // 更新range，更新selection
+      range.setEnd(startContainer, start);
+      range.setStart(startContainer, start);
+      selection.addRange(range);
+    })
   }
 
   toggleBold() {
