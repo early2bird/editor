@@ -111,12 +111,8 @@ export class AppComponent {
     this.isChineseInput = true;
   }
 
-  compositionupdate(event: any) {
-  }
-
   compositionend(event: any) {
     this.isChineseInput = false;
-    console.log(event.data, 'end');
     this.insertChineseText(event.data);
   }
 
@@ -177,7 +173,6 @@ export class AppComponent {
       range.setStart(startContainer, startOffset + text.length);
       selection.addRange(range);
     })
-    console.log(this.doc,'数据')
   }
 
   // 退格删除，删除的是前面的元素，delete删除删除的是后面元素

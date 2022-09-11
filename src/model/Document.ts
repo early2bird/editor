@@ -41,7 +41,11 @@ export class IDocument extends INode {
       return;
     }
     // 删除片段中的内容
-    (node as ISegment).deleteText(offset, length)
+    const textLen = (node as ISegment).deleteText(offset, length);
+    if (!textLen) {
+      const paragraph = this.findParentNodeById(node.id);
+      (paragraph as IParagraph).deleteSegment(node.id);
+    }
   }
 
   toggleBold(startId: string, endId: string, startOffset: number, endOffset: number, style: IStyle) {

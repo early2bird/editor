@@ -36,6 +36,8 @@ export class ISegment extends INode {
       return;
     }
     this.text = this.text.slice(0, offset) + this.text.slice(offset + length);
+    // 如果没有数据删除segment对象啊
+    return this.text.length;
   }
 
   addStyle(style: IStyle) {

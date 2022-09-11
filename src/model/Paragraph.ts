@@ -16,8 +16,8 @@ export class IParagraph extends INode {
 
   constructor(id: string, segments: ISegment[], style: IStyle) {
     super(id, 'paragraph');
-    this.segments = segments.map((segment,index) => {
-      return ISegment.create({...segment,id:`${this.id}${index}`})
+    this.segments = segments.map((segment, index) => {
+      return ISegment.create({...segment, id: `${this.id}${index}`})
     });
     this.id = id;
     this.style = style;
@@ -46,6 +46,11 @@ export class IParagraph extends INode {
       this.segments = head.concat([before, after]).concat(tail);
       return [before, after]
     }
-
   }
+
+  deleteSegment(id: string) {
+    const index = this.segments.findIndex(segment => segment.id === id);
+    this.segments.splice(index, 1);
+  }
+
 }
