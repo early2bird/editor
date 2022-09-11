@@ -4,23 +4,26 @@ import {IStyle} from "./IStyle";
 
 export class IParagraph extends INode {
   static create(data: any) {
-    const {id, segments, style} = data;
+    const {id, segments, style, parentId} = data;
     const newSegments: ISegment[] = segments.map((item: INode) => item);
-    return new IParagraph(id, newSegments, style)
+    return new IParagraph(id, parentId, newSegments, style)
   }
 
   public type = 'paragraph';
   public segments: ISegment[];
   public style: IStyle;
   public id;
+  public parentId;
 
-  constructor(id: string, segments: ISegment[], style: IStyle) {
-    super(id, 'paragraph');
-    this.segments = segments.map((segment, index) => {
-      return ISegment.create({...segment, id: `${this.id}${index}`})
-    });
+  constructor(id: string, parentId: string, segments: ISegment[], style: IStyle) {
+    super(id, parentId, 'paragraph');
+    this.parentId = parentId;
     this.id = id;
     this.style = style;
+    this.segments = segments.map((segment, index) => {
+      return ISegment.create({...segment, id: `${this.id}${index}`, parentId: this.id})
+    });
+
   }
 
   /**
@@ -51,6 +54,11 @@ export class IParagraph extends INode {
   deleteSegment(id: string) {
     const index = this.segments.findIndex(segment => segment.id === id);
     this.segments.splice(index, 1);
+    return this.segments[index - 1]; // 返回前一个segment，重新定位鼠标
+  }
+
+  addStyle(style: IStyle) {
+    this.style = {...this.style, ...style};
   }
 
 }

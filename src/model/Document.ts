@@ -19,10 +19,10 @@ export class IDocument extends INode {
   public type = 'document';
 
   constructor(id: string, nodes: IParagraph[] = []) {
-    super(id, 'document');
+    super(id, id, 'document');
     this.id = id;
     this.nodes = nodes.map((node, index) => {
-      return IParagraph.create({...node, id: `${this.id}${index}`});
+      return IParagraph.create({...node, id: `${this.id}${index}`, parentId: id});
     })
   }
 
@@ -35,7 +35,7 @@ export class IDocument extends INode {
     }
   }
 
-  deleteText(id: string | number, offset: number, length: number) {
+  deleteText(id: string | number, offset: number, length: number): any {
     const node: INode | any = this.findNodeById(id);
     if (!node || !(node instanceof ISegment)) {
       return;
@@ -43,9 +43,22 @@ export class IDocument extends INode {
     // 删除片段中的内容
     const textLen = (node as ISegment).deleteText(offset, length);
     if (!textLen) {
-      const paragraph = this.findParentNodeById(node.id);
-      (paragraph as IParagraph).deleteSegment(node.id);
+      const paragraph = this.findParentParagraphNodeById(node) as IParagraph;
+      const prevSegment = (paragraph as IParagraph).deleteSegment(node.id);
+      if (!prevSegment) { // 当一个段落中的片段为0删除段落
+        this.deleteParagraph(paragraph.id);
+      } else {
+        return {
+          prevSegment
+        }
+      }
+
     }
+  }
+
+  deleteParagraph(id: string) {
+    const index = this.nodes.findIndex(paragraph => paragraph.id === id);
+    this.nodes.splice(index, 1);
   }
 
   toggleBold(startId: string, endId: string, startOffset: number, endOffset: number, style: IStyle) {
@@ -53,7 +66,8 @@ export class IDocument extends INode {
   }
 
   /**
-   * 添加行内样式添加startId到endId之间的所有segment都需要添加样式，第一个的startOffset左侧的内容不需要填，需要切分segment,最有一个segment的endoffset右侧不需要填，需要切分样式
+   * 添加行内样式添加startId到endId之间的所有segment都需要添加样式，
+   * 第一个的startOffset左侧的内容不需要填，需要切分segment,最有一个segment的endoffset右侧不需要填，需要切分样式
    * @param startId
    * @param startOffset
    * @param endId
@@ -67,14 +81,14 @@ export class IDocument extends INode {
     }
     // 处理第一个
     const first = nodes[0];
-    const firstParent = this.findParentNodeById(first.id) as IParagraph;
+    const firstParent = this.findParentParagraphNodeById(first) as IParagraph;
     // 第一个的前一个节点样式不变只处理后面的
     const [, after] = firstParent.split(first.id, startOffset);
     (after as ISegment).addStyle(style);
     if (nodes.length !== 1) {
       // 处理最后一个
       const last = nodes[nodes.length - 1];
-      const lastParent = this.findParentNodeById(last.id) as IParagraph;
+      const lastParent = this.findParentParagraphNodeById(last) as IParagraph;
       const [before,] = lastParent.split(last.id, endOffset);
       (before as ISegment).addStyle(style);
     }
@@ -85,6 +99,22 @@ export class IDocument extends INode {
       (segment as ISegment).addStyle(style);
     })
     // return [after.id, 0, before.id, endOffset];
+  }
+
+  /**
+   * 添加段落样式，根据startId和endId找到所有段落，段落样式不用切分
+   * @param startId
+   * @param startOffset
+   * @param endId
+   * @param endOffset
+   * @param style
+   */
+  addParagraphStyle(startId: string, startOffset: number, endId: string, endOffset: number, style: IStyle) {
+    const paragraphs: Array<IParagraph> = this.findParagraphsByStartAndEnd(startId, endId);
+    paragraphs.forEach(paragraph => {
+      paragraph.addStyle(style)
+    })
+
   }
 
   /**
@@ -115,17 +145,42 @@ export class IDocument extends INode {
     return result;
   }
 
-  // 找到父节点
-  findParentNodeById(id: string) {
-    let parent;
+  /**
+   * 记录所有segment的父节点的集合，最终计算paragraph
+   * @param startId
+   * @param endId
+   */
+  findParagraphsByStartAndEnd(startId: string, endId: string): Array<IParagraph> {
+    const parentIds = []
+    let firstStart = false;
     for (const paragraph of this.nodes) {
       for (const segment of paragraph.segments) {
-        if (id === segment.id) {
-          parent = paragraph;
+        if (segment.id === startId) {
+          parentIds.push(segment.parentId);
+          firstStart = true;
+          continue;
+        }
+        if (segment.id === endId) {
+          parentIds.push(segment.parentId);
+          return this.getParagraphsByIds(parentIds);
+        }
+        if (firstStart) {
+          parentIds.push(segment.parentId);
         }
       }
     }
-    return parent;
+    return this.getParagraphsByIds(parentIds);
+  }
+
+  getParagraphsByIds(parentIds: Array<string>) {
+    return this.nodes.filter((paragraph => {
+      return parentIds.includes(paragraph.id);
+    }))
+  }
+
+  // 找到父节点
+  findParentParagraphNodeById(node: INode) {
+    return this.nodes.find(paragraph => paragraph.id === node.parentId);
   }
 
   // 逐级别的插入id,document,paragraph segment 根据不同的类型进行操作

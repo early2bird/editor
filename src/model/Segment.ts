@@ -3,24 +3,25 @@ import {IStyle} from "./IStyle";
 
 export class ISegment extends INode {
   static create(data: any) {
-    const {id, text, style} = data;
-    return new ISegment(id, text, style)
+    const {id, text, style, parentId} = data;
+    return new ISegment(id, parentId, text, style)
   }
 
   public text = '';
   public style;
   public id;
   public type = 'segment';
+  public parentId;
 
-  constructor(id: string, text: string, style: IStyle) {
-    super(id, 'segment');
+  constructor(id: string, parentId: string, text: string, style: IStyle) {
+    super(id, parentId, 'segment');
     this.text = text || '';
     this.id = id;
     this.style = style;
+    this.parentId = parentId;
   }
 
   insetText(offset: number, text: string) {
-    console.log('insert')
     if (offset < 0 || offset > this.text.length) { // 边界处理
       return;
     }
@@ -60,6 +61,10 @@ export class ISegment extends INode {
 
   toggleBold(style: IStyle) {
     Object.assign(this.style, style);
+  }
+
+  clearStyle() {
+    this.style = {};
   }
 
 }

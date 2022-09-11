@@ -18,8 +18,10 @@ export class AppComponent {
         {
           type: 'paragraph',
           id: '11',
+          parentId: '1',
           segments: [
             {
+              parentId: '11',
               type: 'segment',
               id: "111",
               text: 'abc',
@@ -29,6 +31,7 @@ export class AppComponent {
               }
             },
             {
+              parentId: '11',
               type: 'segment',
               id: "112",
               text: 'def',
@@ -44,9 +47,11 @@ export class AppComponent {
         },
         {
           id: '12',
+          parentId: '1',
           type: 'paragraph',
           segments: [
             {
+              parentId: '12',
               type: 'segment',
               id: '121',
               text: '第二段',
@@ -55,6 +60,7 @@ export class AppComponent {
               }
             },
             {
+              parentId: '12',
               type: 'segment',
               id: '122',
               text: '第二段',
@@ -94,9 +100,9 @@ export class AppComponent {
       this.deleteText(true);
     } else if (event.code === 'Delete') {
       this.deleteText(false);
-    } else if (event.key === 'b' && (event.metaKey || event.ctrlKey)) { // 加粗
+    } else if (event.key === 'b' && (event.metaKey || event.ctrlKey)) { // 行内样式
       this.toggleBold();
-    } else if (event.key === 'c' && event.metaKey && event.shiftKey) {
+    } else if (event.key === 'c' && event.metaKey || event.ctrlKey) { // 添加段落样式
       this.applyCenter();
     } else if (event.code === 'Enter') {
       this.splitParagraph();
@@ -182,7 +188,7 @@ export class AppComponent {
       return;
     }
     const range = selection.getRangeAt(0);
-    const startContainer = range.startContainer;
+    let startContainer = range.startContainer;
     const parentElement = startContainer.parentElement;
 
     if (!range.collapse) {
@@ -194,12 +200,20 @@ export class AppComponent {
     const id = parentElement.id;
     const startOffset = range.startOffset;
     // 删除前一个 delete删除后一个
-    const start = back ? startOffset - 1 : startOffset;
+    let start = back ? startOffset - 1 : startOffset;
     if (start < 0) {
       return;
     }
     // 一次只能删除一个
-    this.doc.deleteText(id, start, 1);
+    const result = this.doc.deleteText(id, start, 1);
+    if (result?.prevSegment) { // 处理删除有个segment后鼠标重新定位
+      const segmentEle = document.getElementById(result.prevSegment.id);
+      if (segmentEle?.lastChild) {
+        startContainer = segmentEle?.lastChild;
+        start = result.prevSegment.text.length || 0;
+      }
+    }
+    // 删除一个段落后(段落是否可以删除)
     setTimeout(() => {
       // 更新range，更新selection
       range.setEnd(startContainer, start);
@@ -214,7 +228,7 @@ export class AppComponent {
       return;
     }
     const range = selection.getRangeAt(0);
-    const startContainer = range.startContainer;
+    let startContainer = range.startContainer;
     const endContainer = range.endContainer;
     const startOffset = range.startOffset;
     const endOffset = range.endOffset;
@@ -225,15 +239,35 @@ export class AppComponent {
     }
     const startId = startParentElement?.id;
     const endId = endParentElement?.id;
-    console.log(startOffset, endOffset, startId, endId)
     this.doc.toggleBold(startId, endId, startOffset, endOffset, {
       fontWeight: "bold"
     })
     this.doc = IDocument.create(this.doc);
-    console.log(this.doc, 'docs')
   }
 
   applyCenter() {
+    const selection = window.getSelection();
+    if (!selection || !selection.getRangeAt(0)) {
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    let startContainer = range.startContainer;
+    const endContainer = range.endContainer;
+    const startOffset = range.startOffset;
+    const endOffset = range.endOffset;
+    const startParentElement = startContainer.parentElement;
+    const endParentElement = endContainer.parentElement;
+    if (!startParentElement || !endParentElement) {
+      return;
+    }
+    const startId = startParentElement?.id;
+    const endId = endParentElement?.id;
+    this.doc.addParagraphStyle(startId, startOffset, endId, endOffset, {
+      textAlign: "center"
+    })
+    this.doc = IDocument.create(this.doc);
+    console.log(this.doc, '-----------')
+
   }
 
   splitParagraph() {
