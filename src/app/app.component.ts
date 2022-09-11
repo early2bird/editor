@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {IDocument} from "../model/Document";
+import {Event} from "@angular/router";
 
 @Component({
   selector: 'app-root',
@@ -9,6 +10,7 @@ import {IDocument} from "../model/Document";
 export class AppComponent {
   title = 'rich-editor';
   doc!: IDocument;
+  isChineseInput = false;
 
   ngOnInit() {
     this.doc = IDocument.create({
@@ -79,6 +81,10 @@ export class AppComponent {
    * 组织keydown一个事件还不够，中文输入依旧可以输入
    */
   keyDown(event: KeyboardEvent) {
+    if (this.isChineseInput || event.key === 'Process') { // process在中文输入法输入的第一次会触发
+      return;
+    }
+    console.log('keyDown')
     // 这里如果考虑兼容性可以不使用字符串，可以使用对应编码来判断
     if (['Shift', 'Control', 'Alt', 'Mate', ''].includes(event.key)) {
       return;
@@ -95,13 +101,27 @@ export class AppComponent {
     } else if (event.code === 'Enter') {
       this.splitParagraph();
     } else {
-      this.insertText(event);
+      this.insertText(event.key);
     }
 
   }
 
+  // 不切输入法不会触发
+  compositionstart(event: any) {
+    this.isChineseInput = true;
+  }
+
+  compositionupdate(event: any) {
+  }
+
+  compositionend(event: any) {
+    this.isChineseInput = false;
+    console.log(event.data, 'end');
+    this.insertChineseText(event.data);
+  }
+
   // 根据id和偏移量插入到对应的segment中
-  insertText(event: KeyboardEvent) {
+  insertText(text: string) {
     const selection = window.getSelection();
     if (!selection || !selection.getRangeAt(0)) {
       return;
@@ -120,7 +140,6 @@ export class AppComponent {
     }
     const id = parentElement.id;
     const startOffset = range.startOffset;
-    const text = event.key;
     this.doc.insertText(id, startOffset, text);
     // setTimeout
     setTimeout(() => {
@@ -129,6 +148,36 @@ export class AppComponent {
       range.setStart(startContainer, startOffset + text.length);
       selection.addRange(range);
     })
+  }
+
+  insertChineseText(text: string) {
+    const selection = window.getSelection();
+    if (!selection || !selection.getRangeAt(0)) {
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    // 拿到鼠标所在位置的元素，是文本内容
+    const startContainer = range.startContainer;
+    // 获得span元素根据span元素的id计算segment对象
+    const parentElement = startContainer.parentElement;
+
+    if (!range.collapse) {
+      return;
+    }
+    if (!parentElement) {
+      return;
+    }
+    const id = parentElement.id;
+    const startOffset = range.startOffset - text.length;
+    this.doc.insertText(id, startOffset, text);
+    // setTimeout
+    setTimeout(() => {
+      // 更新range，更新selection
+      range.setEnd(startContainer, startOffset + text.length);
+      range.setStart(startContainer, startOffset + text.length);
+      selection.addRange(range);
+    })
+    console.log(this.doc,'数据')
   }
 
   // 退格删除，删除的是前面的元素，delete删除删除的是后面元素
