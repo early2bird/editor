@@ -1,5 +1,4 @@
 <div [id]="paragraph.id" [style]="paragraph.style">
-  <ng-container *ngFor="let segment of paragraph.segments">
-    <app-editor-segment [segment]="segment" [style]="segment.style"></app-editor-segment>
-  </ng-container>
+  <app-editor-segment *ngFor="let segment of paragraph.segments;trackBy:tracByFn" [segment]="segment"
+                      [style]="segment.style"></app-editor-segment>
 </div>

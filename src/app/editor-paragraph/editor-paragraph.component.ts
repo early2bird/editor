@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {IParagraph} from "../../model/Paragraph";
+import {ISegment} from "../../model/Segment";
 
 @Component({
   selector: 'app-editor-paragraph',
@@ -13,6 +14,10 @@ export class EditorParagraphComponent implements OnInit {
   }
 
   ngOnInit(): void {
+  }
+
+  tracByFn(item: any) {
+    return item.id
   }
 
 }

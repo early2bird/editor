@@ -16,4 +16,7 @@ export class EditorDocumentComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  tracByFn(item: any) {
+    return item.id;
+  }
 }
