@@ -54,7 +54,7 @@ export class ISegment extends INode {
       this,
       ISegment.create({
         text: after,
-        style: {...this.style} // 不能直接赋值，直接赋值是引用
+        style: after ? {...this.style} : {} // 不能直接赋值，直接赋值是引用,没有内容style重置
       })
     ]
   }
