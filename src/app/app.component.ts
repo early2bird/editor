@@ -67,6 +67,15 @@ export class AppComponent {
               style: {
                 color: 'green'
               }
+            },
+            {
+              parentId: '13',
+              type: 'segment',
+              id: '122',
+              text: '第三段',
+              style: {
+                color: 'blue'
+              }
             }
           ],
           style: {
@@ -90,9 +99,8 @@ export class AppComponent {
     if (this.isChineseInput || event.key === 'Process') { // process在中文输入法输入的第一次会触发
       return;
     }
-    console.log('keyDown')
     // 这里如果考虑兼容性可以不使用字符串，可以使用对应编码来判断
-    if (['Shift', 'Control', 'Alt', 'Mate', ''].includes(event.key)) {
+    if (['Shift', 'Control', 'Alt', 'Mate', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'].includes(event.key)) {
       return;
     }
     event.preventDefault();
@@ -104,8 +112,10 @@ export class AppComponent {
       this.toggleBold();
     } else if (event.key === 'c' && event.metaKey || event.ctrlKey) { // 添加段落样式
       this.applyCenter();
-    } else if (event.code === 'Enter') {
+    } else if (event.key === 'Enter') {
       this.splitParagraph();
+    } else if (event.key === 'ArrowLeft' && event.ctrlKey) {
+      console.log('向左旋')
     } else {
       this.insertText(event.key);
     }
@@ -263,13 +273,38 @@ export class AppComponent {
     const startId = startParentElement?.id;
     const endId = endParentElement?.id;
     this.doc.addParagraphStyle(startId, startOffset, endId, endOffset, {
-      textAlign: "center"
+      textIndent: "40px"
     })
     this.doc = IDocument.create(this.doc);
-    console.log(this.doc, '-----------')
 
   }
 
   splitParagraph() {
+    const selection = window.getSelection();
+    if (!selection || !selection.getRangeAt(0)) {
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    const startContainer = range.startContainer;
+    const parentElement = startContainer.parentElement;
+
+    if (!range.collapse) {
+      return;
+    }
+    if (!parentElement) {
+      return;
+    }
+    const id = parentElement.id;
+    const startOffset = range.startOffset;
+    console.log(id, startOffset, '切分位置')
+    this.doc.splitParagraph(id, startOffset);
+    this.doc = IDocument.create(this.doc);
+    console.log(this.doc,'重新计算')
+    setTimeout(() => {
+      // 更新range，更新selection
+      range.setEnd(startContainer, startOffset );
+      range.setStart(startContainer, startOffset);
+      selection.addRange(range);
+    })
   }
 }

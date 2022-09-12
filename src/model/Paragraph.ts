@@ -30,6 +30,7 @@ export class IParagraph extends INode {
    * 切分segments 返回结果为一个数组，第一项是分割符号之前，第二个是分隔符之后
    * @param id
    * @param offset
+   * @param splitSelf 段落切分并且切分segments
    */
   split(id: string, offset: number, splitSelf?: boolean) {
     const segmentIndex = this.segments.findIndex((segment) => segment.id === id);

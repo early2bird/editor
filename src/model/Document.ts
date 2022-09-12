@@ -178,9 +178,29 @@ export class IDocument extends INode {
     }))
   }
 
-  // 找到父节点
+  /**
+   * 切分段落
+   * @param id
+   * @param offset
+   */
+  splitParagraph(id: string, offset: number) {
+    const segment: INode | any = this.findNodeById(id);
+    const paragraph = this.findParentParagraphNodeById(segment) as IParagraph;
+    const [before, after] = paragraph.split(id, offset, true) as Array<IParagraph>;
+    const index = this.findParagraphIndex(paragraph.id);
+    this.nodes.splice(index + 1, 0, after);
+  }
+
+  /**
+   * 根据当前节点找到父段落
+   * @param node
+   */
   findParentParagraphNodeById(node: INode) {
     return this.nodes.find(paragraph => paragraph.id === node.parentId);
+  }
+
+  findParagraphIndex(id: string): number {
+    return this.nodes.findIndex(paragraph => paragraph.id === id);
   }
 
   // 逐级别的插入id,document,paragraph segment 根据不同的类型进行操作
