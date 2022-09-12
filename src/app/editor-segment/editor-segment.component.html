@@ -1,1 +1,3 @@
-<span [id]="segment.id" [style]="segment.style">{{segment.text}}</span>
+<span *ngIf="segment.text" [id]="segment.id" [style]="segment.style">{{segment.text}}</span>
+<span *ngIf="!segment.text" style="padding: 1px 0">&nbsp;</span>
+

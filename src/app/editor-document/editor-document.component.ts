@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {IDocument} from "../../model/Document";
 
 @Component({
-  selector: 'app-editor-document',
+  selector: '.editor-document',
   templateUrl: './editor-document.component.html',
   styleUrls: ['./editor-document.component.scss']
 })

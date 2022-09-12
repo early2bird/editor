@@ -14,5 +14,5 @@
 </div>
 <div id="editArea" contenteditable="true" (keydown)="keyDown($event)" (compositionstart)="compositionstart($event)"
      (compositionend)="compositionend($event)">
-  <app-editor-document [iDocument]="doc"></app-editor-document>
+  <div class="editor-document" [iDocument]="doc"></div>
 </div>

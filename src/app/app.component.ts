@@ -100,10 +100,24 @@ export class AppComponent {
       return;
     }
     // 这里如果考虑兼容性可以不使用字符串，可以使用对应编码来判断
-    if (['Shift', 'Control', 'Alt', 'Mate', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'ArrowRight'].includes(event.key)) {
+    if (['Shift', 'Control', 'Alt', 'Mate'].includes(event.key)) {
+      return;
+    }
+    // 一些选择的操作不能阻止默认操作
+    if (event.key === 'ArrowLeft' && event.ctrlKey && event.shiftKey || event.key === 'ArrowLeft') {
+      return;
+    }
+    if (event.key === 'ArrowRight' && event.ctrlKey && event.shiftKey || event.key === 'ArrowRight') {
+      return;
+    }
+    if (event.key === 'ArrowDown' && event.ctrlKey && event.shiftKey || event.key === 'ArrowDown') {
+      return;
+    }
+    if (event.key === 'ArrowUp' && event.ctrlKey && event.shiftKey || event.key === 'ArrowUp') {
       return;
     }
     event.preventDefault();
+
     if (event.code === 'Backspace') {
       this.deleteText(true);
     } else if (event.code === 'Delete') {
@@ -114,8 +128,6 @@ export class AppComponent {
       this.applyCenter();
     } else if (event.key === 'Enter') {
       this.splitParagraph();
-    } else if (event.key === 'ArrowLeft' && event.ctrlKey) {
-      console.log('向左旋')
     } else {
       this.insertText(event.key);
     }
@@ -299,10 +311,10 @@ export class AppComponent {
     console.log(id, startOffset, '切分位置')
     this.doc.splitParagraph(id, startOffset);
     this.doc = IDocument.create(this.doc);
-    console.log(this.doc,'重新计算')
+    console.log(this.doc, '重新计算')
     setTimeout(() => {
       // 更新range，更新selection
-      range.setEnd(startContainer, startOffset );
+      range.setEnd(startContainer, startOffset);
       range.setStart(startContainer, startOffset);
       selection.addRange(range);
     })

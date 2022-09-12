@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {ISegment} from "../../model/Segment";
 
 @Component({
-  selector: 'app-editor-segment',
+  selector: '.editor-segment',
   templateUrl: './editor-segment.component.html',
   styleUrls: ['./editor-segment.component.scss']
 })

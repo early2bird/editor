@@ -3,7 +3,7 @@ import {IParagraph} from "../../model/Paragraph";
 import {ISegment} from "../../model/Segment";
 
 @Component({
-  selector: 'app-editor-paragraph',
+  selector: '.editor-paragraph',
   templateUrl: './editor-paragraph.component.html',
   styleUrls: ['./editor-paragraph.component.scss']
 })
