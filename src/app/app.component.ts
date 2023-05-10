@@ -11,6 +11,8 @@ export class AppComponent {
   title = 'rich-editor';
   doc!: IDocument;
   isChineseInput = false;
+  undoStack: Array<any> = [];
+  redoStack: any[] = [];
 
   ngOnInit() {
     this.doc = IDocument.create({
@@ -128,6 +130,10 @@ export class AppComponent {
       this.applyCenter();
     } else if (event.key === 'Enter') {
       this.splitParagraph();
+    } else if (event.key === 'z' && (event.metaKey || event.ctrlKey) && event.shiftKey) {
+      this.redo();
+    } else if (event.key === 'z' && (event.metaKey || event.ctrlKey)) {
+      this.undo();
     } else {
       this.insertText(event.key);
     }
@@ -318,5 +324,33 @@ export class AppComponent {
       range.setStart(startContainer, startOffset);
       selection.addRange(range);
     })
+  }
+
+  // 重做
+  redo() {
+    if (!this.redoStack.length) {
+      console.log('重做栈为空')
+      return;
+    }
+    this.undoStack.push('current');
+    const current = this.redoStack.pop();
+    this.setDocument(current)
+
+  }
+
+  // 撤销
+  undo() {
+    if (!this.undoStack.length) {
+      console.log('撤销栈为空')
+      return;
+    }
+    const undoDoc = this.undoStack.pop();// 出栈
+    this.redoStack.push("current");
+    this.setDocument(undoDoc);
+  }
+
+  // 设置当前状态
+  setDocument(document: any) {
+    console.log(document)
   }
 }
